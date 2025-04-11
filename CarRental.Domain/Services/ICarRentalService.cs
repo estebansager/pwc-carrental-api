@@ -12,7 +12,6 @@ namespace CarRental.Domain.Services
         Task<RentalDto> RegisterRentalAsync(Guid customerId, Guid carId, DateTime startDate, DateTime endDate);
         Task<RentalDto> ModifyReservationAsync(Guid rentalId, DateTime? newStartDate = null, DateTime? newEndDate = null, Guid? newCarId = null);
         Task CancelRentalAsync(Guid rentalId);
-        Task<(CarType CarType, double UtilizationPercent)> GetMostRentedCarTypeAsync(DateTime from, DateTime to);
 
     }
 }

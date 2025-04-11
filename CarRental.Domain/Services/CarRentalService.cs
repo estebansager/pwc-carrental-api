@@ -78,11 +78,6 @@ namespace CarRental.Domain.Services
         }
 
 
-        public async Task<(CarType CarType, double UtilizationPercent)> GetMostRentedCarTypeAsync(DateTime from, DateTime to)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<RentalDto> ModifyReservationAsync(Guid rentalId, DateTime? newStartDate = null, DateTime? newEndDate = null, Guid? newCarId = null)
         {
             var rental = await GetRentalAsync(rentalId);

@@ -58,6 +58,7 @@ void ConfigureDependencies()
     /*Services*/
     builder.Services.AddScoped<ICarRentalService, CarRentalService>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
+    builder.Services.AddScoped<IRentalReportingService, RentalReportingService>();
 
 }
 
