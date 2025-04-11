@@ -1,6 +1,5 @@
 ﻿using CarRental.DB.Contexts;
-using CarRental.Domain.Models.Cars;
-using CarRental.Domain.Models.Customers;
+using CarRental.DB.Entities;
 
 namespace CarRental.DB.Repositories
 {

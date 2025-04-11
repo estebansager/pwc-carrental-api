@@ -1,6 +1,4 @@
-﻿using CarRental.Domain.Models.Customers;
-
-namespace CarRental.Domain.Models.Cars
+﻿namespace CarRental.DB.Entities
 {
     public class Rental
     {

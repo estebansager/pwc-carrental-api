@@ -1,5 +1,4 @@
-﻿using CarRental.Domain.Models.Cars;
-using CarRental.Domain.Models.Customers;
+﻿using CarRental.DB.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRental.DB.Contexts

@@ -29,8 +29,7 @@ namespace CarRental.Api.Middlewares
 
                 var errorResponse = new
                 {
-                    message = "An unexpected error occurred. Please try again or contact an administrator.",
-                    detail = ex.Message
+                    message = "An unexpected error occurred. Please try again or contact an administrator."
                 };
 
                 var json = JsonSerializer.Serialize(errorResponse);

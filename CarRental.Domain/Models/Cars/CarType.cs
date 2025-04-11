@@ -3,7 +3,7 @@
     public enum CarType
     {
         Sedan,
-        Hatch,
+        Hatchback,
         SUV,
         Pickup
     }
