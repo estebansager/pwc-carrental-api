@@ -1,6 +1,6 @@
-﻿using CarRental.Domain.Models.Cars;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using CarRental.DB.Entities;
 
 namespace CarRental.DB.Configurations
 {

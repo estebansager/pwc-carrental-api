@@ -22,9 +22,15 @@ namespace CarRental.DB.Repositories
         }
 
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            IQueryable<T> query = _dbSet;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.Where(predicate).ToListAsync();
         }
 
         public async Task AddAsync(T entity)
@@ -35,6 +41,11 @@ namespace CarRental.DB.Repositories
         public void Update(T entity)
         {
             _dbSet.Update(entity);
+        }
+
+        public void Remove(T entity)
+        {
+            _dbSet.Remove(entity);
         }
 
     }
