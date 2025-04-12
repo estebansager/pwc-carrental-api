@@ -6,18 +6,19 @@ namespace CarRental.Domain.Mappers
     internal class RentalMapper
     {
 
-            public static RentalDto MapToDto(Rental rental)
+        public static RentalDto MapToDto(Rental rental)
+        {
+            return new RentalDto()
             {
-                return new RentalDto()
-                {
-                    Id = rental.Id,
-                    CarId = rental.CarId,
-                    CustomerId = rental.CustomerId,
-                    StartDate = rental.StartDate,
-                    EndDate = rental.EndDate
-                };
-
-            }
+                Id = rental.Id,
+                CarId = rental.CarId,
+                CustomerId = rental.CustomerId,
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
+                CarModel = rental.Car.Model,
+                CarType = rental.Car.Type
+            };
+        }
 
     }
 

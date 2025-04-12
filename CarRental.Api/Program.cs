@@ -6,13 +6,19 @@ using CarRental.Domain.Models.Cars;
 using CarRental.Domain.Models.Customers;
 using CarRental.Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services
+       .AddControllers()
+       .AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -34,6 +40,11 @@ if (app.Environment.IsDevelopment())
 //for simplicity on testing the app, this line is commented
 //app.UseHttpsRedirection();
 
+app.UseCors(c => {
+    c.AllowAnyMethod();
+    c.AllowAnyOrigin();
+    c.AllowAnyHeader();
+});
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthorization();
 
@@ -59,6 +70,8 @@ void ConfigureDependencies()
     builder.Services.AddScoped<ICarRentalService, CarRentalService>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
     builder.Services.AddScoped<IRentalReportingService, RentalReportingService>();
+    builder.Services.AddScoped<ICarService, CarService>();
+
 
 }
 
