@@ -31,8 +31,16 @@ public class CarRentalController : ControllerBase
     [Route("availability")]
     public async Task<IActionResult> CheckAvailability(DateTime startDate, DateTime endDate, string? model, CarType? type)
     {
-        var result = await _carRentalService.CheckAvailabilityAsync(startDate, endDate, type, model);
-        return Ok(result);
+        try
+        {
+            var result = await _carRentalService.CheckAvailabilityAsync(startDate, endDate, type, model);
+            return Ok(result);
+
+        }
+        catch (InvalidRentDatesException ird)
+        {
+            return BadRequest(ird.Message);
+        }
     }
 
     [HttpGet]
@@ -55,7 +63,7 @@ public class CarRentalController : ControllerBase
                 customer = await _customerService.RegisterCustomerAsync(rentalIn.CustomerIdNumber, rentalIn.CustomerFullName, rentalIn.CustomerAddress);
             }
 
-            var result = await _carRentalService.RegisterRentalAsync(customer.Id, rentalIn.CarId, rentalIn.StartDate, rentalIn.EndDate);
+            var result = await _carRentalService.RegisterRentalAsync(customer.Id, rentalIn.CarModel, rentalIn.CarType, rentalIn.StartDate, rentalIn.EndDate);
             return Ok(result);
         }
         catch (CarNotAvailableException ex)

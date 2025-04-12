@@ -1,6 +1,4 @@
-﻿using CarRental.Domain.Models.Customers;
-
-namespace CarRental.Domain.Models.Rentals
+﻿namespace CarRental.Domain.Models.Rentals
 {
     public class RentalDto
     {
@@ -8,6 +6,8 @@ namespace CarRental.Domain.Models.Rentals
         public Guid CustomerId { get; set; }
 
         public Guid CarId { get; set; }
+        public string CarType { get; set; }
+        public string CarModel { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }

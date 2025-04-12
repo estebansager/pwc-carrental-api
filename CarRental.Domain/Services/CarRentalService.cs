@@ -3,13 +3,10 @@ using CarRental.Domain.Models.Cars;
 using CarRental.DB.Repositories;
 using CarRental.Domain.Mappers;
 using CarRental.DB.Entities;
-using Microsoft.EntityFrameworkCore;
 using CarRental.Domain.Exceptions;
 using CarRental.Domain.Models.Rentals;
 using Microsoft.Extensions.Logging;
-using Castle.Core.Resource;
-using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace CarRental.Domain.Services
 {
@@ -22,6 +19,8 @@ namespace CarRental.Domain.Services
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
+
+
 
 
         public async Task CancelRentalAsync(Guid rentalId)
@@ -45,8 +44,12 @@ namespace CarRental.Domain.Services
         }
 
 
-        public async Task<IEnumerable<CarDto>> CheckAvailabilityAsync(DateTime startDate, DateTime endDate, CarType? type = null, string model = null)
+        public async Task<IEnumerable<CarAvailabilityDto>> CheckAvailabilityAsync(DateTime startDate, DateTime endDate, CarType? type = null, string model = null)
         {
+
+            if (endDate < startDate || startDate < DateTime.UtcNow.Date)
+                throw new InvalidRentDatesException("Invalid dates provided. Make sure you are checking availability from a present or future date and that the end date is greater than the start date");
+
             var result = await _unitOfWork.Cars.FindAsync(
                 c =>
                     (!type.HasValue || c.Type.ToLower() == type.Value.ToString().ToLower()) &&
@@ -57,7 +60,12 @@ namespace CarRental.Domain.Services
                 x => x.Services
             );
 
-            return result.Select(CarMapper.MapToDto);
+            return result.GroupBy(r => (r.Type, r.Model)).Select(g => 
+                new CarAvailabilityDto() {
+                    Model = g.Key.Model,
+                    Type = g.Key.Type,
+                    Count = g.Count()
+                });
         }
 
         public async Task<bool> IsAvailable(Guid carId, DateTime startDate, DateTime endDate, Guid? rentalId = null)
@@ -75,6 +83,27 @@ namespace CarRental.Domain.Services
             )).FirstOrDefault();
 
             return car != null;
+        }
+
+        public async Task<CarDto?> GetAvailableCar(CarType carType, string carModel, DateTime startDate, DateTime endDate, Guid? rentalId = null)
+        {
+            var car = (await _unitOfWork.Cars.FindAsync(
+                c =>
+                    c.Type == carType.ToString() &&
+                    c.Model == carModel &&
+                    !c.Rentals.Any(r =>
+                            r.Id != rentalId /*If checking availability for dates of the same rental, do not consider it*/
+                            && startDate <= r.EndDate.AddDays(1)
+                            && endDate >= r.StartDate) &&
+                    !c.Services.Any(s => startDate <= s.StartDate.AddDays(s.DurationInDays - 1) && endDate >= s.StartDate),
+                x => x.Rentals,
+                x => x.Services
+            )).FirstOrDefault();
+
+            if (car == null)
+                return null;
+
+            return CarMapper.MapToDto(car);
         }
 
 
@@ -121,7 +150,7 @@ namespace CarRental.Domain.Services
         /// <param name="startDate">Starting date of the rental</param>
         /// <param name="endDate">Ending date of the rental</param>
         /// <returns></returns>
-        public async Task<RentalDto> RegisterRentalAsync(Guid customerId, Guid carId, DateTime startDate, DateTime endDate)
+        public async Task<RentalDto> RegisterRentalAsync(Guid customerId, string carModel, CarType carType, DateTime startDate, DateTime endDate)
         {
 
             /* First validate that the startDate is not in the past and that endDate is greater than startDate */
@@ -129,11 +158,11 @@ namespace CarRental.Domain.Services
                 throw new InvalidRentDatesException("The provided date range is invalid. Make sure the starting date is not in the past and that the ending date is greater than the starting date");
 
             /* Now validate that the car is available for renting */
-            var isCarAvailable = await IsAvailable(carId, startDate, endDate);
-            if (!isCarAvailable) {
+            var car = await GetAvailableCar(carType, carModel, startDate, endDate);
+            if (car == null) {
                 /* User tried to rent a car that is now available. Might be important to log for auditing purposes */
-                _logger.LogWarning($"Customer {customerId} attempted to rent unavailable car {carId} from {startDate} to {endDate}");
-                throw new CarNotAvailableException("The selected car is not available for renting for the provided dates");
+                _logger.LogWarning($"Customer {customerId} attempted to rent unavailable car model {carModel} and car type {carType} from {startDate} to {endDate}");
+                throw new CarNotAvailableException("The selected car model and type is not available for renting for the provided dates");
             }
 
 
@@ -141,7 +170,7 @@ namespace CarRental.Domain.Services
             {
                 Id = Guid.NewGuid(),
                 CustomerId = customerId,
-                CarId = carId,
+                CarId = car.Id,
                 StartDate = startDate,
                 EndDate = endDate
             };

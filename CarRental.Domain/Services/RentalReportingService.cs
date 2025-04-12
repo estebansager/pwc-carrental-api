@@ -61,7 +61,7 @@ namespace CarRental.Domain.Services
                     {
                         CarId = car.Id,
                         CarType = car.Type,
-                        Model = car.Model,
+                        CarModel = car.Model,
                         ServiceStartDate = s.StartDate,
                         DurationInDays = s.DurationInDays
                     }));

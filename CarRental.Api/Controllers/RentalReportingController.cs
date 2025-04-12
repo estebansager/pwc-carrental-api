@@ -23,7 +23,7 @@ public class RentalReportingController : ControllerBase
     }
 
     [HttpGet]
-    [Route("mostusedtype")]
+    [Route("mostrentedcar")]
     public async Task<IActionResult> GetMostUsedCarType(DateTime startDate, DateTime endDate)
     {
         try
