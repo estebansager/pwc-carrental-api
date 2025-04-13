@@ -72,7 +72,7 @@ namespace CarRental.Domain.Services
                     Count = g.Count()
                 });
         }
-        public async Task<CarDto?> GetAvailableCar(CarType? carType, string carModel, DateTime startDate, DateTime endDate, Guid? rentalId = null)
+        private async Task<CarDto?> GetAvailableCar(CarType? carType, string carModel, DateTime startDate, DateTime endDate, Guid? rentalId = null)
         {
             var car = (await _unitOfWork.Cars.FindAsync(
                 c =>

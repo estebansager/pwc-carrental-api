@@ -16,7 +16,7 @@ namespace CarRental.Domain.Mappers
                     Id = customer.Id,
                     PersonalIdNumber = customer.PersonalIdNumber,
                     Address = customer.Address,
-                    FullName = customer.Address
+                    FullName = customer.FullName
                 };
 
             }

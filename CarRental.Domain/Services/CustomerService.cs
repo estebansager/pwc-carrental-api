@@ -1,12 +1,7 @@
-﻿    
-using CarRental.Domain.Models.Cars;
-using CarRental.DB.Repositories;
+﻿using CarRental.DB.Repositories;
 using CarRental.Domain.Mappers;
 using CarRental.DB.Entities;
-using Microsoft.EntityFrameworkCore;
-using CarRental.Domain.Exceptions;
 using CarRental.Domain.Models.Customers;
-using Castle.Core.Resource;
 
 namespace CarRental.Domain.Services
 {
