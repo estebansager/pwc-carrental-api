@@ -4,7 +4,9 @@
     {
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
-
+        public int CustomerIdNumber { get; set; }
+        public string CustomerFullName { get; set; }
+        public string CustomerAddress { get; set; }
         public Guid CarId { get; set; }
         public string CarType { get; set; }
         public string CarModel { get; set; }
