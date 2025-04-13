@@ -1,6 +1,5 @@
 ﻿using CarRental.Domain.Models.Cars;
 using CarRental.Domain.Models.Rentals;
-using Microsoft.Extensions.Primitives;
 
 namespace CarRental.Domain.Services
 {

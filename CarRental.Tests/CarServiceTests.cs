@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CarRental.Domain.Services;
-using CarRental.Domain.Models.Rentals;
-using CarRental.Domain.Models.Cars;
-using CarRental.Domain.Exceptions;
+﻿using CarRental.Domain.Services;
 using CarRental.DB.Repositories;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using Microsoft.Extensions.Logging;
 using CarRental.DB.Entities;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 
 namespace CarRental.Tests
 {
@@ -21,6 +15,7 @@ namespace CarRental.Tests
     {
         private Mock<ICarRentalDbUnitOfWork> _unitOfWorkMock;
         private Mock<ICarRentalDbRepository<Car>> _carRepositoryMock;
+        private Mock<IConfiguration> _configurationMock;
         private CarService _carService;
 
         [SetUp]
@@ -29,7 +24,24 @@ namespace CarRental.Tests
             _carRepositoryMock = new Mock<ICarRentalDbRepository<Car>>();
             _unitOfWorkMock = new Mock<ICarRentalDbUnitOfWork>();
             _unitOfWorkMock.SetupProperty(p => p.Cars, _carRepositoryMock.Object);
-            _carService = new CarService(_unitOfWorkMock.Object);
+            _configurationMock = new Mock<IConfiguration>();
+
+
+
+            _configurationMock.Setup(c => c.GetSection("Caching:CarTypeCacheKey").Value)
+                              .Returns("cartpes");
+
+            _configurationMock.Setup(c => c.GetSection("Caching:CarModelCacheKey").Value)
+                              .Returns("carmodels");
+
+
+            _configurationMock.Setup(c => c.GetSection("Caching:CarTypeCacheDurationInHours").Value)
+                              .Returns("1");
+
+            _configurationMock.Setup(c => c.GetSection("Caching:CarModelCacheDurationInHours").Value)
+                              .Returns("1");
+
+            _carService = new CarService(_unitOfWorkMock.Object, new MemoryCacheService(new MemoryCache(new MemoryCacheOptions())), _configurationMock.Object);
         }
         [Category("Car Service")]
         [Test]

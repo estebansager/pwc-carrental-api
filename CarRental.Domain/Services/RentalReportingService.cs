@@ -12,6 +12,13 @@ namespace CarRental.Domain.Services
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Gets the most rented car type by a provided date range
+        /// </summary>
+        /// <param name="startDate">start of the date rage to look up</param>
+        /// <param name="endDate">end of the date rage to look up</param>
+        /// <returns>Rented car type with percentage of usage</returns>
+        /// <exception cref="InvalidRentDatesException"></exception>
         public async Task<MostRentedCarTypeDto> GetMostRentedCarTypeAsync(DateTime startDate, DateTime endDate)
         {
             if (endDate < startDate)
@@ -43,7 +50,10 @@ namespace CarRental.Domain.Services
             };
         }
 
-
+        /// <summary>
+        /// Gets a list of cars that have scheduled services in the next two weeks
+        /// </summary>
+        /// <returns>List of scheduled services</returns>
         public async Task<IEnumerable<ScheduledServiceDto>> GetScheduledServicesNextTwoWeeksAsync()
         {
             var today = DateTime.UtcNow.Date;
