@@ -15,6 +15,11 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
 	</ItemGroup>
 
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CarRental.Domain\CarRental.Domain.csproj" />
+	</ItemGroup>
+
 	
 
 </Project>
