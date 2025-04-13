@@ -1,5 +1,7 @@
 ﻿using CarRental.DB.Contexts;
 using CarRental.DB.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace CarRental.DB.Repositories
 {
@@ -26,6 +28,27 @@ namespace CarRental.DB.Repositories
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Executes a Database action as a transaction with an isolation level. This is important for race conditions over rentals, for example
+        /// </summary>
+        /// <param name="action">The action to run (against the DB)</param>
+        /// <param name="isolationLevel">The DB isolatioDFn level to use in the transaction</param>
+        /// <returns></returns>
+        public async Task ExecuteTransactionAsync(Func<Task> action, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(isolationLevel);
+            try
+            {
+                await action();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
     }

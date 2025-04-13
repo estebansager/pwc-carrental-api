@@ -13,6 +13,7 @@ using NUnit.Framework;
 using Microsoft.Extensions.Logging;
 using CarRental.DB.Entities;
 using System.Linq.Expressions;
+using System.Data;
 
 namespace CarRental.Tests
 {
@@ -282,6 +283,10 @@ namespace CarRental.Tests
                 .Callback<Rental>(r => { r.Customer = new Customer(); r.Car = new Car(); })
                 .Returns(Task.CompletedTask);
 
+            _unitOfWorkMock
+              .Setup(uow => uow.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), It.IsAny<IsolationLevel>()))
+              .Returns<Func<Task>, IsolationLevel>((func, _) => func());
+
             // Act
             var result = await _carRentalService.RegisterRentalAsync(customerId, carModel, carType, startDate, endDate);
 
@@ -326,6 +331,10 @@ namespace CarRental.Tests
             var startDate = DateTime.UtcNow.AddDays(2);
             var endDate = startDate.AddDays(2);
 
+            _unitOfWorkMock
+                .Setup(uow => uow.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), It.IsAny<IsolationLevel>()))
+                .Returns<Func<Task>, IsolationLevel>((func, _) => func());
+
             _carRepositoryMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<Car, bool>>>(), It.IsAny<Expression<Func<Car, object>>[]>()))
                 .ReturnsAsync(new List<Car>()); 
@@ -349,6 +358,10 @@ namespace CarRental.Tests
 
             _unitOfWorkMock.Setup(u => u.Cars.FindAsync(It.IsAny<Expression<Func<Car, bool>>>(), null, null))
                 .ReturnsAsync(new List<Car>());
+
+            _unitOfWorkMock
+              .Setup(uow => uow.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), It.IsAny<IsolationLevel>()))
+              .Returns<Func<Task>, IsolationLevel>((func, _) => func());
 
             // Act
             Func<Task> act = async () => await _carRentalService.RegisterRentalAsync(customerId, "Honda CR-V", CarType.SUV, startDate, endDate);

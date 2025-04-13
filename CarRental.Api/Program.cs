@@ -2,8 +2,6 @@ using CarRental.Api.Middlewares;
 using CarRental.DB.Contexts;
 using CarRental.DB.Entities;
 using CarRental.DB.Repositories;
-using CarRental.Domain.Models.Cars;
-using CarRental.Domain.Models.Customers;
 using CarRental.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -72,6 +70,8 @@ void ConfigureDependencies()
     builder.Services.AddScoped<IRentalReportingService, RentalReportingService>();
     builder.Services.AddScoped<ICarService, CarService>();
 
+    builder.Services.AddMemoryCache();
+    builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
 }
 

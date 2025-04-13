@@ -1,14 +1,31 @@
 ﻿using CarRental.DB.Repositories;
+using Microsoft.Extensions.Configuration;
 
 namespace CarRental.Domain.Services
 {
     public class CarService : ICarService
     {
         
-        private ICarRentalDbUnitOfWork _unitOfWork;
-        public CarService(ICarRentalDbUnitOfWork unitOfWork)
+        private readonly ICarRentalDbUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
+        private readonly string _carTypesCacheKey;
+        private readonly string _carModelsCacheKey;
+        private readonly int _carTypesCacheDurationInHours;
+        private readonly int _carModelsCacheDurationInHours;
+
+
+
+        private const string CarModelsCacheKey = "car-models";
+        
+
+        public CarService(ICarRentalDbUnitOfWork unitOfWork, ICacheService cacheService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
+            _carTypesCacheKey = configuration.GetSection("Caching:CarTypeCacheKey").Value;
+            _carModelsCacheKey = configuration.GetSection("Caching:CarModelCacheKey").Value;
+            _carTypesCacheDurationInHours = int.Parse(configuration.GetSection("Caching:CarTypeCacheDurationInHours").Value);
+            _carModelsCacheDurationInHours = int.Parse(configuration.GetSection("Caching:CarModelCacheDurationInHours").Value);
         }
 
         /// <summary>
@@ -17,7 +34,10 @@ namespace CarRental.Domain.Services
         /// <returns></returns>
         public async Task<IEnumerable<string>> GetCarTypes()
         {
-            return (await _unitOfWork.Cars.FindAsync(c => true)).Select(c => c.Type).Distinct();
+            return await _cacheService.GetOrSetAsync(_carTypesCacheKey, async () =>
+            {
+                return (await _unitOfWork.Cars.FindAsync(c => true)).Select(c => c.Type).Distinct();
+            }, TimeSpan.FromHours(_carTypesCacheDurationInHours));
         }
 
         /// <summary>
@@ -27,7 +47,10 @@ namespace CarRental.Domain.Services
         /// <returns></returns>
         public async Task<IEnumerable<string>> GetCarModels()
         {
-            return (await _unitOfWork.Cars.FindAsync(c => true)).Select(c => c.Model).Distinct();
+            return await _cacheService.GetOrSetAsync(_carModelsCacheKey, async () =>
+            {
+                return (await _unitOfWork.Cars.FindAsync(c => true)).Select(c => c.Model).Distinct();
+            }, TimeSpan.FromHours(_carModelsCacheDurationInHours));
         }
     }
 }

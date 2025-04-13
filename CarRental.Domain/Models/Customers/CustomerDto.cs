@@ -1,6 +1,4 @@
-﻿using CarRental.Domain.Models.Rentals;
-
-namespace CarRental.Domain.Models.Customers
+﻿namespace CarRental.Domain.Models.Customers
 {
     public class CustomerDto
     {

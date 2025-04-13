@@ -11,7 +11,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace CarRental.Tests.Domain.Services
+namespace CarRental.Tests
 {
     [TestFixture]
     public class RentalReportingServiceTests

@@ -7,16 +7,21 @@ using CarRental.Domain.Mappers;
 using CarRental.Domain.Models.Customers;
 using CarRental.Domain.Services;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
 
-namespace CarRental.Tests.Domain.Services
+namespace CarRental.Tests
 {
     [TestFixture]
     public class CustomerServiceTests
     {
         private Mock<ICarRentalDbUnitOfWork> _unitOfWorkMock;
         private Mock<ICarRentalDbRepository<Customer>> _customerRepositoryMock;
+        private Mock<ICacheService> _cacheServiceMock;
+        private Mock<IConfiguration> _configurationMock;
+
         private CustomerService _customerService;
 
         [SetUp]
@@ -25,8 +30,19 @@ namespace CarRental.Tests.Domain.Services
             _customerRepositoryMock = new Mock<ICarRentalDbRepository<Customer>>();
             _unitOfWorkMock = new Mock<ICarRentalDbUnitOfWork>();
             _unitOfWorkMock.SetupProperty(p => p.Customers, _customerRepositoryMock.Object);
+            _configurationMock = new Mock<IConfiguration>();
+            _cacheServiceMock = new Mock<ICacheService>();
+            _configurationMock.Setup(c => c.GetSection("Caching:CustomerCacheDurationInHours").Value)
+                  .Returns("2");
 
-            _customerService = new CustomerService(_unitOfWorkMock.Object);
+            _cacheServiceMock
+                .Setup(x => x.GetOrSetAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Func<Task<CustomerDto>>>(),
+                    It.IsAny<TimeSpan?>()))
+                .Returns((string key, Func<Task<CustomerDto>> getData, TimeSpan? expiration) => getData());
+
+            _customerService = new CustomerService(_unitOfWorkMock.Object, _cacheServiceMock.Object, _configurationMock.Object);
         }
 
         [Category("RegisterCustomerAsync")]

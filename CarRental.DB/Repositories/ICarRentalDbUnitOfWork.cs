@@ -1,4 +1,5 @@
 ﻿using CarRental.DB.Entities;
+using System.Data;
 
 namespace CarRental.DB.Repositories
 {
@@ -12,6 +13,7 @@ namespace CarRental.DB.Repositories
 
 
         Task<int> SaveChangesAsync();
+        Task ExecuteTransactionAsync(Func<Task> action, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
 
     }
 }
