@@ -43,14 +43,6 @@ public class CarRentalController : ControllerBase
         }
     }
 
-    [HttpGet]
-    [Route("availability/{carId}")]
-    public async Task<IActionResult> CheckAvailability([FromRoute]Guid carId, DateTime startDate, DateTime endDate)
-    {
-        var result = await _carRentalService.IsAvailable(carId, startDate, endDate, null);
-        return Ok(result);
-    }
-
     [HttpPost]
     public async Task<IActionResult> RegisterRental([FromBody]RentalIn rentalIn)
     {
@@ -84,7 +76,7 @@ public class CarRentalController : ControllerBase
 
         try
         {
-            var result = await _carRentalService.ModifyReservationAsync(id, rentalUpdateIn.StartDate, rentalUpdateIn.EndDate, rentalUpdateIn.CarId);
+            var result = await _carRentalService.ModifyReservationAsync(id, rentalUpdateIn.StartDate, rentalUpdateIn.EndDate, rentalUpdateIn.CarModel, rentalUpdateIn.CarType);
             return Ok(result);
         }
         catch (CarNotAvailableException ex)
@@ -110,6 +102,21 @@ public class CarRentalController : ControllerBase
 
     }
 
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<IActionResult> GetRentalById(Guid id)
+    {
+        try
+        {
+            var result = await _carRentalService.GetRentalByIdAsync(id);
+            return Ok(result);
+        }
+        catch (RentalNotFoundException rnf)
+        {
+            return NotFound(rnf.Message);
+        }
+
+    }
 
     [HttpDelete]
     [Route("{id}")]
@@ -118,8 +125,7 @@ public class CarRentalController : ControllerBase
         try
         {
             await _carRentalService.CancelRentalAsync(id);
-            return Ok("Rental deleted successfully");
-
+            return NoContent();
         }
         catch (RentalNotFoundException rnf)
         {

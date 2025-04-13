@@ -39,8 +39,13 @@ namespace CarRental.Domain.Services
 
         public async Task<IEnumerable<RentalDto>> GetRentalsAsync()
         {
-            var rentals = await _unitOfWork.Rentals.FindAsync(r => true);
+            var rentals = await _unitOfWork.Rentals.FindAsync(r => true, x => x.Customer, x => x.Car);
             return rentals.Select(RentalMapper.MapToDto);
+        }
+
+        public async Task<RentalDto> GetRentalByIdAsync(Guid rentalId)
+        {
+            return RentalMapper.MapToDto(await GetRentalAsync(rentalId));
         }
 
 
@@ -67,29 +72,11 @@ namespace CarRental.Domain.Services
                     Count = g.Count()
                 });
         }
-
-        public async Task<bool> IsAvailable(Guid carId, DateTime startDate, DateTime endDate, Guid? rentalId = null)
+        public async Task<CarDto?> GetAvailableCar(CarType? carType, string carModel, DateTime startDate, DateTime endDate, Guid? rentalId = null)
         {
             var car = (await _unitOfWork.Cars.FindAsync(
                 c =>
-                    c.Id == carId &&
-                    !c.Rentals.Any(r => 
-                            r.Id != rentalId /*If checking availability for dates of the same rental, do not consider it*/
-                            && startDate <= r.EndDate.AddDays(1) 
-                            && endDate >= r.StartDate) &&
-                    !c.Services.Any(s => startDate <= s.StartDate.AddDays(s.DurationInDays - 1) && endDate >= s.StartDate),
-                x => x.Rentals,
-                x => x.Services
-            )).FirstOrDefault();
-
-            return car != null;
-        }
-
-        public async Task<CarDto?> GetAvailableCar(CarType carType, string carModel, DateTime startDate, DateTime endDate, Guid? rentalId = null)
-        {
-            var car = (await _unitOfWork.Cars.FindAsync(
-                c =>
-                    c.Type == carType.ToString() &&
+                    c.Type == (carType.HasValue ? carType.Value.ToString(): c.Type) &&
                     c.Model == carModel &&
                     !c.Rentals.Any(r =>
                             r.Id != rentalId /*If checking availability for dates of the same rental, do not consider it*/
@@ -107,11 +94,10 @@ namespace CarRental.Domain.Services
         }
 
 
-        public async Task<RentalDto> ModifyReservationAsync(Guid rentalId, DateTime? newStartDate = null, DateTime? newEndDate = null, Guid? newCarId = null)
+        public async Task<RentalDto> ModifyReservationAsync(Guid rentalId, DateTime? newStartDate = null, DateTime? newEndDate = null, string? newCarModel = null, CarType? newCarType = null)
         {
             var rental = await GetRentalAsync(rentalId);
 
-            var selectedCarId = newCarId.HasValue ? newCarId.Value : rental.CarId;
             var selectedStartDate = newStartDate.HasValue ? newStartDate.Value : rental.StartDate;
             var selectedEndDate = newEndDate.HasValue ? newEndDate.Value : rental.EndDate;
 
@@ -119,22 +105,22 @@ namespace CarRental.Domain.Services
                 throw new InvalidRentDatesException("The provided date range is invalid. Make sure the starting date is not in the past and that the ending date is greater than the starting date");
 
 
-            if (selectedCarId == rental.CarId && selectedStartDate == rental.StartDate && selectedEndDate == rental.EndDate) {
+            if (newCarModel == rental.Car.Model && newCarType?.ToString() == rental.Car.Type && selectedStartDate == rental.StartDate && selectedEndDate == rental.EndDate) {
                 /* nothing to update, return */
                 return RentalMapper.MapToDto(rental);
             }
 
             /* if at least one attribute changed, check if there is availability before updating the rental */
-            var isAvailable = await IsAvailable(selectedCarId, selectedStartDate, selectedEndDate, rental.Id);
-            if (!isAvailable)
+            var newCar = await GetAvailableCar(newCarType.Value, newCarModel, selectedStartDate, selectedEndDate, rental.Id);
+            if (newCar == null)
             {
-                _logger.LogWarning($"Customer {rental.CustomerId} attempted to update a rental without availability for car {selectedCarId} from {selectedStartDate} to {selectedEndDate}");
-                throw new CarNotAvailableException("The selected car with the provided dates is not available for renting");
+                _logger.LogWarning($"Customer {rental.CustomerId} attempted to update a rental without availability for car model {newCarModel} and car type {newCarType} from {selectedStartDate} to {selectedEndDate}");
+                throw new CarNotAvailableException("The selected car type and model with the provided dates is not available for renting");
             }
 
             rental.StartDate = selectedStartDate;
             rental.EndDate = selectedEndDate;
-            rental.CarId = selectedCarId;
+            rental.CarId = newCar.Id;
 
             _unitOfWork.Rentals.Update(rental);
             await _unitOfWork.SaveChangesAsync();
@@ -183,7 +169,7 @@ namespace CarRental.Domain.Services
 
 
         private async Task<Rental> GetRentalAsync(Guid rentalId) {
-            var rental = (await _unitOfWork.Rentals.FindAsync(r => r.Id == rentalId)).FirstOrDefault();
+            var rental = (await _unitOfWork.Rentals.FindAsync(r => r.Id == rentalId, x => x.Car, x => x.Customer)).FirstOrDefault();
             if (rental == null)
                 throw new RentalNotFoundException("The provided rental could not be found");
 
