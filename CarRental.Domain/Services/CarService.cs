@@ -13,11 +13,6 @@ namespace CarRental.Domain.Services
         private readonly int _carTypesCacheDurationInHours;
         private readonly int _carModelsCacheDurationInHours;
 
-
-
-        private const string CarModelsCacheKey = "car-models";
-        
-
         public CarService(ICarRentalDbUnitOfWork unitOfWork, ICacheService cacheService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;

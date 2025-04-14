@@ -73,6 +73,9 @@ void ConfigureDependencies()
     builder.Services.AddMemoryCache();
     builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
+    builder.Services.Configure<RentalSettings>(builder.Configuration.GetSection("RentalSettings"));
+
+
 }
 
 
