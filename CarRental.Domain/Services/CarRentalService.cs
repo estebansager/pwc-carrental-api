@@ -5,6 +5,7 @@ using CarRental.DB.Entities;
 using CarRental.Domain.Exceptions;
 using CarRental.Domain.Models.Rentals;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CarRental.Domain.Services
 {
@@ -12,10 +13,12 @@ namespace CarRental.Domain.Services
     {
         private ICarRentalDbUnitOfWork _unitOfWork;
         private ILogger<CarRentalService> _logger;
-        public CarRentalService(ICarRentalDbUnitOfWork unitOfWork, ILogger<CarRentalService> logger)
+        private readonly RentalSettings _settings;
+        public CarRentalService(ICarRentalDbUnitOfWork unitOfWork, ILogger<CarRentalService> logger, IOptions<RentalSettings> settings)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _settings = settings.Value;
         }
 
 
@@ -80,8 +83,8 @@ namespace CarRental.Domain.Services
                 c =>
                     (!type.HasValue || c.Type.ToLower() == type.Value.ToString().ToLower()) &&
                     (string.IsNullOrEmpty(model) || c.Model.ToLower().Contains(model.ToLower())) &&
-                    !c.Rentals.Any(r => startDate <= r.EndDate.AddDays(1) && endDate >= r.StartDate) &&
-                    !c.Services.Any(s => startDate <= s.StartDate.AddDays(s.DurationInDays - 1) && endDate >= s.StartDate),
+                    !c.Rentals.Any(r => startDate <= r.EndDate.AddDays(_settings.DaysAfterRentalEndsToMakeCarAvailable) && endDate >= r.StartDate) &&
+                    !c.Services.Any(s => startDate <= s.StartDate.AddDays(s.DurationInDays) && endDate >= s.StartDate),
                 x => x.Rentals,
                 x => x.Services
             );

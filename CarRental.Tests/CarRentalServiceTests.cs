@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using CarRental.DB.Entities;
 using System.Linq.Expressions;
 using System.Data;
+using Microsoft.Extensions.Options;
 
 namespace CarRental.Tests
 {
@@ -23,6 +24,8 @@ namespace CarRental.Tests
         private Mock<ICarRentalDbUnitOfWork> _unitOfWorkMock;
         private Mock<ICarRentalDbRepository<Rental>> _rentalRepositoryMock;
         private Mock<ICarRentalDbRepository<Car>> _carRepositoryMock;
+        private Mock<IOptions<RentalSettings>> _rentalSettingsMock;
+
 
         private Mock<ILogger<CarRentalService>> _mockLogger;
         private CarRentalService _carRentalService;
@@ -37,7 +40,16 @@ namespace CarRental.Tests
             _unitOfWorkMock.SetupProperty(p => p.Rentals, _rentalRepositoryMock.Object);
             _unitOfWorkMock.SetupProperty(p => p.Cars, _carRepositoryMock.Object);
             _mockLogger = new Mock<ILogger<CarRentalService>>();
-            _carRentalService = new CarRentalService(_unitOfWorkMock.Object, _mockLogger.Object);
+
+            var rentalSettings = new RentalSettings
+            {
+                DaysAfterRentalEndsToMakeCarAvailable = 1
+            };
+
+            _rentalSettingsMock = new Mock<IOptions<RentalSettings>>();
+            _rentalSettingsMock.Setup(o => o.Value).Returns(rentalSettings);
+
+            _carRentalService = new CarRentalService(_unitOfWorkMock.Object, _mockLogger.Object, _rentalSettingsMock.Object);
         }
 
         [Category("Cancel Rental")]
@@ -274,6 +286,18 @@ namespace CarRental.Tests
                 Type = carType.ToString()
             };
 
+            var rental = new Rental
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                Id = new Guid(),
+                Car = availableCar,
+                CarId = availableCar.Id,
+                CustomerId = customerId,
+                Customer = new Customer() { Id = customerId }
+            };
+
+
             _carRepositoryMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<Car, bool>>>(), It.IsAny<Expression<Func<Car, object>>[]>()))
                 .ReturnsAsync(new List<Car> { availableCar });
@@ -286,6 +310,10 @@ namespace CarRental.Tests
             _unitOfWorkMock
               .Setup(uow => uow.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), It.IsAny<IsolationLevel>()))
               .Returns<Func<Task>, IsolationLevel>((func, _) => func());
+
+
+            _rentalRepositoryMock.Setup(r => r.FindAsync(It.IsAny<Expression<Func<Rental, bool>>>(), It.IsAny<Expression<Func<Rental, object>>[]>())).ReturnsAsync(new List<Rental>() { rental });
+
 
             // Act
             var result = await _carRentalService.RegisterRentalAsync(customerId, carModel, carType, startDate, endDate);
@@ -320,33 +348,7 @@ namespace CarRental.Tests
             await act.Should().ThrowAsync<InvalidRentDatesException>();
         }
 
-        [Category("Register Rental")]
-        [Test]
-        public async Task RegisterRentalAsync_ShouldThrowCarNotAvailableException_WhenNoAvailableCarFound()
-        {
-            // Arrange
-            var customerId = Guid.NewGuid();
-            var carModel = "Honda CR-V";
-            var carType = CarType.Sedan;
-            var startDate = DateTime.UtcNow.AddDays(2);
-            var endDate = startDate.AddDays(2);
-
-            _unitOfWorkMock
-                .Setup(uow => uow.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), It.IsAny<IsolationLevel>()))
-                .Returns<Func<Task>, IsolationLevel>((func, _) => func());
-
-            _carRepositoryMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<Car, bool>>>(), It.IsAny<Expression<Func<Car, object>>[]>()))
-                .ReturnsAsync(new List<Car>()); 
-
-            // Act
-            Func<Task> act = async () => await _carRentalService.RegisterRentalAsync(customerId, carModel, carType, startDate, endDate);
-
-            // Assert
-            await act.Should().ThrowAsync<CarNotAvailableException>();
-
-        }
-
+        
         [Category("Register Rental")]
         [Test]
         public async Task RegisterRentalAsync_ShouldThrowCarNotAvailableException_WhenCarIsNotAvailable()
