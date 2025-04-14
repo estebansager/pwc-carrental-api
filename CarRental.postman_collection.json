@@ -1,0 +1,363 @@
+{
+	"info": {
+		"_postman_id": "f2369925-4e45-4c1a-a70b-71db54e71a7e",
+		"name": "CarRental",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42960764"
+	},
+	"item": [
+		{
+			"name": "rentals/availability",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7137/rentals/availability",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"rentals",
+						"availability"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rentals/",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/rentals",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"rentals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rentals/{id}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/rentals/{{rentalId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"rentals",
+						"{{rentalId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cars/types",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/cars/types",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"cars",
+						"types"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cars/models",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/cars/models",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"cars",
+						"models"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reporting/mostrentedcar/",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/reporting/mostrentedcar?startDate=2025-01-01&endDate=2025-12-31",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"reporting",
+						"mostrentedcar"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "2025-01-01"
+						},
+						{
+							"key": "endDate",
+							"value": "2025-12-31"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reporting/scheduledservice",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/reporting/scheduledservices",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"reporting",
+						"scheduledservices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rentals",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"CustomerIdNumber\": 36798555,\r\n    \"CustomerFullName\": \"Esteban Sager\",\r\n    \"CustomerAddress\": \"Calle Falsa 123\",\r\n    \"CarType\": \"Pickup\",\r\n    \"CarModel\": \"Volkswagen Amarok\",\r\n    \"StartDate\": \"2025-04-11\",\r\n    \"EndDate\": \"2025-04-13\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/rentals",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"rentals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rentals/{rentalId}",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"CarId\": \"{{carId}}\",\r\n    \"StartDate\": \"2025-03-11\",\r\n    \"EndDate\": \"2025-04-15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/rentals/{{rentalId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"rentals",
+						"{{rentalId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rentals/{rentalId}",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7137/rentals/{{rentalId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7137",
+					"path": [
+						"rentals",
+						"{{rentalId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "carId",
+			"value": "52F06FA4-4C87-4F5A-8D27-179BC83B98A6",
+			"type": "string"
+		},
+		{
+			"key": "rentalId",
+			"value": "52F06FA4-4C87-4F5A-8D27-179BC83B98A6",
+			"type": "string"
+		}
+	]
+}
